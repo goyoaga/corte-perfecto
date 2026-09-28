@@ -5,6 +5,16 @@
 @media(max-width:760px){.topbar{height:57px;padding:0 16px}.layout{display:flex;flex-direction:column;min-height:0}.editorial{border-right:0;padding:26px 20px 16px}.eyebrow,.rules,.editorial-foot{display:none}.editorial h1{font-size:48px;margin:0 0 10px}.intro{font-size:13px;line-height:1.5;max-width:none}.stage-wrap{min-height:390px;height:46svh;max-height:560px;border-top:1px solid #c9c6bc;border-bottom:1px solid #c9c6bc}.stage-top,.stage-bottom{left:16px;right:16px}.stage-top{top:15px}.stage-bottom{bottom:13px}.panel{border-left:0;padding:21px 20px 28px}.panel-view{padding-top:18px}.panel h2{font-size:36px}.panel-view>p:not(.personal-best){margin-bottom:15px}.panel-foot{margin-top:22px}.apple-option{height:50px}.weight-card{margin:14px 0}.weight-card strong,.difference strong{font-size:38px}.cut-hint{bottom:40px;font-size:8px;padding:10px}.footer{height:auto;padding:18px 20px;line-height:1.5}.footer span:first-child{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
 
+/* Partículas ligeras sobre la pantalla, sin bloquear los botones del resultado. */
+.confetti-layer{position:fixed;inset:0;z-index:30;overflow:hidden;pointer-events:none}
+.confetti-piece{position:absolute;left:var(--x);top:var(--y);width:8px;height:13px;border-radius:2px;opacity:0;animation:confetti-fall var(--duration) var(--delay) ease-out forwards}
+@keyframes confetti-fall{
+  0%{opacity:0;transform:translate3d(0,-20px,0) rotate(0deg)}
+  10%{opacity:1}
+  82%{opacity:1}
+  100%{opacity:0;transform:translate3d(var(--dx),var(--dy),0) rotate(var(--spin))}
+}
+
 /* El apoyo aparece una sola vez dentro del juego, después del resultado. */
 .coffee-link{display:flex;justify-content:center;align-items:center;gap:8px;min-height:44px;margin-top:13px;text-align:center;color:#a34434;font-size:10px;font-weight:700;letter-spacing:.08em;text-decoration:none;border:1px solid #c8a499;transition:background .2s}
 .coffee-link:hover{background:#e8d8cf}
