@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#eeebe3" />
+    <meta name="description" content="Tres manzanas. Un corte. ¿Podrás dividir el peso exactamente por la mitad?" />
+    <title>El corte perfecto — Un juego de precisión</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand"><span class="brand-mark">✳</span> EL CORTE PERFECTO <span class="edition">/ 001</span></div>
+        <span class="top-note">UN PEQUEÑO EXPERIMENTO SOBRE EL EQUILIBRIO</span>
+        <button id="sound-toggle" class="sound-button" type="button" aria-label="Activar sonido">SONIDO: OFF</button>
+      </header>
+
+      <main class="layout">
+        <aside class="editorial">
+          <div class="eyebrow">EL RETO · 01 / 03</div>
+          <h1>El corte<br /><em>perfecto.</em></h1>
+          <p class="intro">Tres manzanas. Una elección. Un solo corte para conseguir dos mitades del mismo peso.</p>
+          <div class="rules"><span class="rule-number">01</span><span>Elige una manzana</span><span class="rule-number">02</span><span>Traza tu corte</span><span class="rule-number">03</span><span>Descubre el resultado</span></div>
+          <div class="editorial-foot">NO HAY TRUCO. SOLO OJO, PULSO Y UN POCO DE SUERTE.</div>
+        </aside>
+
+        <section class="stage-wrap" aria-label="Escena interactiva del juego">
+          <div id="stage" class="stage"></div>
+          <div class="stage-top"><span class="stage-kicker" id="stage-kicker">LA COSECHA DE HOY</span><span id="stage-step">01 — SELECCIÓN</span></div>
+          <div id="cut-overlay" class="cut-overlay hidden" aria-label="Dibuja la línea de corte sobre la manzana"><svg id="cut-svg" viewBox="0 0 100 100" preserveAspectRatio="none"><line id="cut-line" x1="0" y1="0" x2="0" y2="0" /></svg><div id="cut-hint" class="cut-hint">DESLIZA EL DEDO O EL RATÓN SOBRE LA MANZANA</div></div>
+          <div id="loading" class="loading">PREPARANDO LA COSECHA…</div>
+          <div id="webgl-error" class="webgl-error hidden">Tu navegador no ha podido iniciar la escena 3D. Prueba a actualizarlo o abrir el juego en otro navegador.</div>
+          <div class="stage-bottom"><span>PIEZAS ÚNICAS, CORTES ÚNICOS</span><span>HECHO CON THREE.JS ↗</span></div>
+        </section>
+
+        <aside class="panel">
+          <div class="panel-label">EL EXPERIMENTO <span>↗</span></div>
+          <div id="select-panel" class="panel-view">
+            <h2>Escoge tu<br />manzana.</h2>
+            <p>Cada fruta tiene una forma y un peso diferentes. Mira bien antes de decidir.</p>
+            <div id="apple-options" class="apple-options"></div>
+            <div class="panel-tip">Toca una manzana en la escena o selecciónala aquí.</div>
+          </div>
+          <div id="aim-panel" class="panel-view hidden">
+            <h2>Un corte.<br />Nada más.</h2>
+            <p>Arrastra una línea sobre la fruta. Puedes corregirla antes de cortar.</p>
+            <div class="weight-card"><span>PESO TOTAL</span><strong id="total-weight">— g</strong><small>OBJETIVO: DOS MITADES IGUALES</small></div>
+            <div id="aim-status" class="aim-status">Dibuja una línea para empezar.</div>
+            <button id="cut-button" class="primary-button" type="button" disabled>HACER EL CORTE <span>↗</span></button>
+            <button id="back-button" class="quiet-button" type="button">← ELEGIR OTRA MANZANA</button>
+          </div>
+          <div id="result-panel" class="panel-view hidden" aria-live="polite">
+            <div class="result-overline">EL VEREDICTO</div>
+            <h2 id="verdict">Bien<br />cortado.</h2>
+            <div class="scale"><div class="scale-bar"><div id="scale-center" class="scale-center"></div></div><div class="scale-pans"><div>MITAD A<strong id="piece-a">— g</strong></div><div>MITAD B<strong id="piece-b">— g</strong></div></div></div>
+            <div class="difference"><span>DIFERENCIA</span><strong id="difference">— g</strong><small id="percentage">— % DEL PESO TOTAL</small></div>
+            <p id="personal-best" class="personal-best"></p>
+            <button id="again-button" class="primary-button" type="button">OTRA PARTIDA <span>↗</span></button>
+          </div>
+          <div class="panel-foot">¿CUÁN CERCA ESTÁS DEL 50 / 50?</div>
+        </aside>
+      </main>
+      <footer class="footer"><span>UN JUEGO BREVE PARA LOS AMANTES DE LAS PEQUEÑAS OBSESIONES.</span><span>© 2026 · EL CORTE PERFECTO</span></footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
