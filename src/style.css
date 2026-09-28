@@ -44,3 +44,22 @@
   #app[data-view="aim"] .cut-overlay{bottom:0}
   .footer{gap:12px;flex-wrap:wrap}
 }
+
+/* Acceso a favoritos visible sin ocupar espacio de la escena ni de los controles. */
+.top-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.save-button{width:36px;height:36px;display:grid;place-items:center;border:1px solid #c5c4b9;border-radius:2px;background:transparent;color:#ad4c3c;font-size:24px;line-height:1}
+.save-button:hover,.save-button:focus-visible{background:#e8dfd4}
+.save-dialog{width:min(420px,calc(100vw - 32px));padding:32px;border:1px solid #c9c6bc;background:#f5f1e9;color:#252925;box-shadow:0 22px 70px #201b1770}
+.save-dialog::backdrop{background:#22292385}
+.save-close{position:absolute;right:13px;top:10px;border:0;background:none;color:#666b62;font-size:26px;line-height:1}
+.save-eyebrow{font-size:10px;font-weight:700;letter-spacing:.13em;color:#ad4c3c}
+.save-dialog h2{margin:13px 0 16px;font-family:'Playfair Display',Georgia,serif;font-size:35px;font-weight:500;line-height:1.1}
+.save-dialog p{font-size:14px;line-height:1.6;color:#444b41}
+.save-dialog .save-note{font-size:12px;color:#767b73}
+.save-dialog .primary-button{margin-top:22px}
+@media(max-width:760px){
+  .topbar{gap:8px}
+  .top-actions{gap:6px}
+  .sound-button{padding:9px 7px;white-space:nowrap}
+}
+@media(max-width:390px){.topbar .edition{display:none}.brand{font-size:10px}}
