@@ -12,7 +12,10 @@
       <header class="topbar">
         <div class="brand"><span class="brand-mark">✳</span> EL CORTE PERFECTO <span class="edition">/ 001</span></div>
         <span class="top-note">UN PEQUEÑO EXPERIMENTO SOBRE EL EQUILIBRIO</span>
-        <button id="sound-toggle" class="sound-button" type="button" aria-label="Activar sonido">SONIDO: OFF</button>
+        <div class="top-actions">
+          <button id="save-button" class="save-button" type="button" aria-label="Cómo guardar el juego en favoritos" title="Guardar en favoritos">☆</button>
+          <button id="sound-toggle" class="sound-button" type="button" aria-label="Activar sonido">SONIDO: OFF</button>
+        </div>
       </header>
 
       <main class="layout">
@@ -63,6 +66,14 @@
       </main>
       <footer class="footer"><span>UN JUEGO BREVE PARA LOS AMANTES DE LAS PEQUEÑAS OBSESIONES.</span><span>© 2026 · EL CORTE PERFECTO</span></footer>
     </div>
+    <dialog id="save-dialog" class="save-dialog" aria-labelledby="save-title">
+      <button id="close-save" class="save-close" type="button" aria-label="Cerrar">×</button>
+      <span class="save-eyebrow">PARA VOLVER CUANDO QUIERAS</span>
+      <h2 id="save-title">Guarda el juego ☆</h2>
+      <p id="save-instructions"></p>
+      <p class="save-note">El favorito lo añades desde tu navegador; el juego no puede hacerlo automáticamente.</p>
+      <button id="save-done" class="primary-button" type="button">ENTENDIDO <span>↗</span></button>
+    </dialog>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
