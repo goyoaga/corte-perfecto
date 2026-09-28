@@ -217,6 +217,23 @@ function newGame() {
   setView('select');
 }
 
+function backToSelection() {
+  if (state !== 'aim') return;
+  selected = null;
+  cut = null;
+  pointerStart = null;
+  $('#cut-line').style.opacity = '0';
+  $('#cut-button').disabled = true;
+  apples.forEach((apple, i) => {
+    apple.group.visible = true;
+    apple.group.position.set((i - 1) * 1.82, 0.87, 0);
+    apple.group.scale.setScalar(0.68);
+  });
+  camera.position.copy(frontPosition);
+  camera.lookAt(target);
+  setView('select');
+}
+
 function selectApple(apple) {
   selected = apple;
   apples.forEach((item) => { item.group.visible = item === apple; item.group.rotation.y = 0; });
@@ -432,7 +449,7 @@ stage.addEventListener('click', (event) => {
   if (apple) selectApple(apple);
 });
 $('#cut-button').addEventListener('click', performCut);
-$('#back-button').addEventListener('click', newGame);
+$('#back-button').addEventListener('click', backToSelection);
 $('#again-button').addEventListener('click', newGame);
 $('#sound-toggle').addEventListener('click', () => {
   soundEnabled = !soundEnabled;
