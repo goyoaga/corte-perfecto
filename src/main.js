@@ -6,6 +6,7 @@ const stage = $('#stage');
 const overlay = $('#cut-overlay');
 const options = $('#apple-options');
 const fmt = (number) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(number);
+const fmtPrecise = (number) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(number);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const rnd = (min, max) => min + Math.random() * (max - min);
 const colors = ['#bb3231', '#d8a83a', '#b74b3c'];
@@ -14,6 +15,7 @@ const names = ['Carmín', 'Dorada', 'Rosada'];
 let renderer, scene, camera, apples = [], selected = null, state = 'select';
 let cut = null, pointerStart = null, cutCount = 0, soundEnabled = false;
 let lastTime = 0, activeAnimation = null;
+let confetti = null;
 const clock = new THREE.Clock();
 const target = new THREE.Vector3(0, 0.95, 0);
 const topPosition = new THREE.Vector3(0, 7.4, 0.001);
@@ -198,6 +200,8 @@ function clearApples() {
 
 function newGame() {
   activeAnimation = null;
+  confetti?.remove();
+  confetti = null;
   camera.position.copy(frontPosition);
   camera.lookAt(target);
   clearApples();
@@ -376,7 +380,7 @@ function performCut() {
   const startTime = performance.now();
   camera.position.copy(frontPosition);
   camera.lookAt(target);
-  tone(240, 0.09);
+  knifeSound();
   activeAnimation = () => {
     const progress = clamp((performance.now() - startTime) / 850, 0, 1);
     const eased = 1 - Math.pow(1 - progress, 3);
@@ -395,9 +399,9 @@ function showResult(result) {
   const percentage = difference / selected.weight * 100;
   $('#piece-a').textContent = `${fmt(result.a)} g`;
   $('#piece-b').textContent = `${fmt(result.b)} g`;
-  $('#difference').textContent = `${fmt(difference)} g`;
+  $('#difference').textContent = `${difference < 1 ? fmtPrecise(difference) : fmt(difference)} g`;
   $('#percentage').textContent = `${fmt(percentage)} % DEL PESO TOTAL`;
-  $('#verdict').innerHTML = percentage < 1 ? 'Casi<br />perfecto.' : percentage < 5 ? '¡Muy<br />cerca!' : percentage < 12 ? 'Bien<br />cortado.' : 'Una mitad<br />ganó.';
+  $('#verdict').innerHTML = difference < 1 ? '¡Corte<br />perfecto!' : percentage < 1 ? 'Casi<br />perfecto.' : percentage < 5 ? '¡Muy<br />cerca!' : percentage < 12 ? 'Bien<br />cortado.' : 'Una mitad<br />ganó.';
   $('#scale-center').style.left = `${clamp(50 + (result.b - result.a) / selected.weight * 110, 9, 91)}%`;
   try {
     const previous = Number(localStorage.getItem('corte-perfecto-best'));
@@ -408,7 +412,75 @@ function showResult(result) {
     $('#personal-best').textContent = '';
   }
   setView('result');
+  if (difference < 1) celebrateCut();
   tone(660, 0.055);
+}
+
+function celebrateCut() {
+  // Una celebración breve, sin dependencias ni interacción sobre los controles.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  confetti?.remove();
+  const layer = document.createElement('div');
+  layer.className = 'confetti-layer';
+  layer.setAttribute('aria-hidden', 'true');
+  const palette = ['#bb4333', '#d8a83a', '#486c3d', '#f6d8aa'];
+  for (let i = 0; i < 48; i++) {
+    const piece = document.createElement('i');
+    piece.className = 'confetti-piece';
+    piece.style.setProperty('--x', `${rnd(32, 68)}vw`);
+    piece.style.setProperty('--y', `${rnd(12, 30)}vh`);
+    piece.style.setProperty('--dx', `${rnd(-52, 52)}vw`);
+    piece.style.setProperty('--dy', `${rnd(50, 85)}vh`);
+    piece.style.setProperty('--spin', `${rnd(-720, 720)}deg`);
+    piece.style.setProperty('--delay', `${rnd(0, 0.18)}s`);
+    piece.style.setProperty('--duration', `${rnd(1.2, 1.8)}s`);
+    piece.style.backgroundColor = palette[i % palette.length];
+    layer.appendChild(piece);
+  }
+  document.body.appendChild(layer);
+  confetti = layer;
+  setTimeout(() => {
+    layer.remove();
+    if (confetti === layer) confetti = null;
+  }, 2100);
+}
+
+function knifeSound() {
+  if (!soundEnabled) return;
+  try {
+    // Ruido filtrado para el filo y un golpe suave para el contacto con la fruta.
+    // Se crea dentro del clic: los navegadores móviles permiten audio tras el gesto.
+    const context = new (window.AudioContext || window.webkitAudioContext)();
+    const start = context.currentTime;
+    const duration = 0.18;
+    const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * duration), context.sampleRate);
+    const samples = buffer.getChannelData(0);
+    for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+    const noiseSource = context.createBufferSource();
+    noiseSource.buffer = buffer;
+    const filter = context.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1250;
+    filter.Q.value = 0.8;
+    const swish = context.createGain();
+    swish.gain.setValueAtTime(0.001, start);
+    swish.gain.linearRampToValueAtTime(0.12, start + 0.018);
+    swish.gain.exponentialRampToValueAtTime(0.001, start + duration);
+    noiseSource.connect(filter).connect(swish).connect(context.destination);
+    const thud = context.createOscillator();
+    const thudGain = context.createGain();
+    thud.type = 'triangle';
+    thud.frequency.setValueAtTime(155, start);
+    thud.frequency.exponentialRampToValueAtTime(75, start + 0.1);
+    thudGain.gain.setValueAtTime(0.001, start);
+    thudGain.gain.linearRampToValueAtTime(0.055, start + 0.012);
+    thudGain.gain.exponentialRampToValueAtTime(0.001, start + 0.12);
+    thud.connect(thudGain).connect(context.destination);
+    noiseSource.start(start);
+    thud.start(start);
+    thud.stop(start + 0.12);
+    noiseSource.onended = () => context.close();
+  } catch { /* El audio nunca debe impedir jugar. */ }
 }
 
 function tone(frequency, duration) {
