@@ -7,6 +7,7 @@
 **¿Cuánto te acercarás a dos mitades del mismo peso?**
 
 [![Jugar](https://img.shields.io/badge/▶_JUGAR_AHORA-B54434?style=for-the-badge&logoColor=white)](https://goyoaga.github.io/corte-perfecto/)
+[![Ko-fi](https://img.shields.io/badge/☕_INVÍTAME_UN_CAFÉ-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/arielgoyoaga)
 
 ![Three.js](https://img.shields.io/badge/Three.js-3D-101820?style=for-the-badge&logo=threedotjs&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES_Modules-F7DF1E?style=for-the-badge&logo=javascript&logoColor=222)
@@ -44,6 +45,8 @@ Elige una de tres manzanas generadas con formas irregulares. Verás su **peso to
 
 Abre **[goyoaga.github.io/corte-perfecto](https://goyoaga.github.io/corte-perfecto/)**. Si estás en móvil, desliza el dedo sobre la manzana para marcar el corte. Si estás en escritorio, haz lo mismo con el ratón.
 
+Si te divertiste y te apetece apoyar pequeños juegos gratuitos como este, puedes **[invitarme un café en Ko-fi ☕](https://ko-fi.com/arielgoyoaga)**. Es completamente opcional.
+
 ## 🧰 Ejecutarlo en local
 
 Necesitas Node.js 22 o superior.
@@ -62,9 +65,9 @@ npm run build
 npm run preview
 ```
 
-## 📦 Publicación
+## 📦 Publicación y uso real de Vite
 
-El flujo de `.github/workflows/deploy.yml` compila el proyecto al enviar cambios a `main` y despliega `dist/` en GitHub Pages. En el repositorio, selecciona **Settings → Pages → Build and deployment → Source: GitHub Actions**. La ruta base ya está configurada para `/corte-perfecto/`.
+**Sí, Vite se usa realmente:** `npm run dev` inicia su servidor de desarrollo; `npm run build` ejecuta `vite build`, que agrupa JavaScript, Three.js y CSS en la carpeta `dist/`. El flujo de `.github/workflows/deploy.yml` ejecuta `npm ci` y `npm run build` al enviar cambios a `main`, y publica **ese resultado compilado** en GitHub Pages. `vite.config.js` configura la ruta base `/corte-perfecto/`. Vite no se ejecuta como servidor permanente en producción: GitHub Pages entrega los archivos estáticos que generó.
 
 ## 🎨 Diseño y créditos
 

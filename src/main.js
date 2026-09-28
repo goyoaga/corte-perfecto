@@ -174,11 +174,15 @@ function animate() {
 }
 
 function setView(view) {
+  $('#app').dataset.view = view;
   ['select', 'aim', 'result'].forEach((name) => $(`#${name}-panel`).classList.toggle('hidden', name !== view));
   overlay.classList.toggle('hidden', view !== 'aim');
   $('#stage-step').textContent = view === 'select' ? '01 — SELECCIÓN' : view === 'aim' ? '02 — EL CORTE' : '03 — EL VEREDICTO';
   $('#stage-kicker').textContent = view === 'select' ? 'LA COSECHA DE HOY' : view === 'aim' ? 'BUSCA EL EQUILIBRIO' : 'EL MOMENTO DE LA VERDAD';
   state = view;
+  // En móvil, la pantalla de corte empieza arriba aunque se haya elegido la fruta más abajo.
+  if (view === 'aim' || view === 'result') requestAnimationFrame(() => window.scrollTo(0, 0));
+  requestAnimationFrame(resize);
 }
 
 function clearApples() {
@@ -244,7 +248,8 @@ function selectApple(apple) {
   cut = null;
   $('#cut-line').style.opacity = '0';
   $('#cut-button').disabled = true;
-  camera.position.copy(topPosition);
+  // En la pantalla estrecha acercamos la cámara para que la fruta siga siendo fácil de cortar.
+  camera.position.copy(stage.clientWidth <= 760 ? new THREE.Vector3(0, 5.35, 0.001) : topPosition);
   camera.lookAt(new THREE.Vector3(0, 1.1, 0));
   setView('aim');
   tone(580, 0.04);

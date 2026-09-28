@@ -4,3 +4,36 @@
 @media(max-width:1060px){.layout{grid-template-columns:220px minmax(0,1fr) 250px}.editorial,.panel{padding:28px 18px}.editorial h1{font-size:51px}.top-note{display:none}}
 @media(max-width:760px){.topbar{height:57px;padding:0 16px}.layout{display:flex;flex-direction:column;min-height:0}.editorial{border-right:0;padding:26px 20px 16px}.eyebrow,.rules,.editorial-foot{display:none}.editorial h1{font-size:48px;margin:0 0 10px}.intro{font-size:13px;line-height:1.5;max-width:none}.stage-wrap{min-height:390px;height:46svh;max-height:560px;border-top:1px solid #c9c6bc;border-bottom:1px solid #c9c6bc}.stage-top,.stage-bottom{left:16px;right:16px}.stage-top{top:15px}.stage-bottom{bottom:13px}.panel{border-left:0;padding:21px 20px 28px}.panel-view{padding-top:18px}.panel h2{font-size:36px}.panel-view>p:not(.personal-best){margin-bottom:15px}.panel-foot{margin-top:22px}.apple-option{height:50px}.weight-card{margin:14px 0}.weight-card strong,.difference strong{font-size:38px}.cut-hint{bottom:40px;font-size:8px;padding:10px}.footer{height:auto;padding:18px 20px;line-height:1.5}.footer span:first-child{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* El apoyo aparece después del resultado y también en el pie de la página. */
+.coffee-link{display:flex;justify-content:center;align-items:center;gap:8px;min-height:44px;margin-top:13px;text-align:center;color:#a34434;font-size:10px;font-weight:700;letter-spacing:.08em;text-decoration:none;border:1px solid #c8a499;transition:background .2s}
+.coffee-link:hover{background:#e8d8cf}
+.footer a{color:#a34434;text-decoration:none;white-space:nowrap}
+.footer a:hover{text-decoration:underline}
+
+/* En la fase de corte móvil toda la decisión cabe en la pantalla visible. */
+@media(max-width:760px){
+  #app[data-view="aim"]{height:100dvh;min-height:0;overflow:hidden}
+  #app[data-view="aim"] .editorial,
+  #app[data-view="aim"] .footer,
+  #app[data-view="aim"] .stage-top,
+  #app[data-view="aim"] .stage-bottom,
+  #app[data-view="aim"] .panel-label,
+  #app[data-view="aim"] .panel-foot,
+  #app[data-view="aim"] #aim-panel h2,
+  #app[data-view="aim"] #aim-panel>p{display:none}
+  #app[data-view="aim"] .layout{display:block;flex:0 0 auto;height:calc(100dvh - 57px);min-height:0;overflow:hidden}
+  #app[data-view="aim"] .stage-wrap{height:calc(100dvh - 57px - 154px - env(safe-area-inset-bottom));min-height:0;max-height:none;border-top:0;border-bottom:0}
+  #app[data-view="aim"] .panel{position:fixed;z-index:10;left:0;right:0;bottom:0;height:calc(154px + env(safe-area-inset-bottom));padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:#f5f1e9;border-top:1px solid #c9c6bc;box-shadow:0 -8px 32px #40352914}
+  #app[data-view="aim"] #aim-panel{padding:0}
+  #app[data-view="aim"] .weight-card{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:10px;padding:0;margin:0 0 6px;border:0}
+  #app[data-view="aim"] .weight-card strong{font-family:'DM Sans',Arial,sans-serif;font-size:19px;font-weight:700;letter-spacing:0}
+  #app[data-view="aim"] .weight-card small{display:none}
+  #app[data-view="aim"] .aim-status{font-size:10px;letter-spacing:.02em;color:#6c7068;min-height:16px;line-height:1.35;margin:0 0 7px}
+  #app[data-view="aim"] #cut-button{height:54px}
+  #app[data-view="aim"] #back-button{position:fixed;z-index:12;top:calc(57px + 10px);left:16px;display:flex;align-items:center;min-height:40px;padding:0 12px;background:#f7f2eacc;border:1px solid #c9c6bc;backdrop-filter:blur(8px);color:#343a34;font-size:9px}
+  #app[data-view="aim"] .cut-hint{bottom:24px;max-width:calc(100% - 24px);white-space:normal;text-align:center;line-height:1.4}
+  #app[data-view="aim"] .cut-overlay{bottom:0}
+  .footer{gap:12px;flex-wrap:wrap}
+  .footer a{font-size:10px}
+}
