@@ -31,33 +31,53 @@ function noise(seed) {
 
 function appleShape(apple, y, angle) {
   const h = clamp((y + 1.08) / 2.16, 0, 1);
-  const envelope = Math.pow(Math.max(0, Math.sin(Math.PI * h)), 0.59);
-  const shoulder = 1 + 0.17 * h - 0.09 * Math.cos(2 * Math.PI * h);
+  const envelope = Math.pow(Math.max(0, Math.sin(Math.PI * h)), 0.53);
+  // Hombros anchos y base algo más estrecha: perfil de manzana, no de esfera.
+  const shoulder = 0.86 + 0.34 * h + 0.12 * Math.exp(-Math.pow((h - 0.73) / 0.18, 2));
   const lobes = 1 + apple.lobe * Math.cos(5 * angle + apple.phase) * (0.25 + 0.75 * h)
     + apple.bend * Math.cos(3 * angle - apple.phase * 0.7) * (1 - 0.25 * h);
   return apple.width * envelope * shoulder * lobes;
 }
 
+function surfaceY(y, radius) {
+  // La hendidura superior y la cavidad inferior usan el mismo perfil en piel y volumen.
+  const crown = 0.27 * Math.exp(-Math.pow(radius / 0.38, 2)) * clamp((y - 0.28) / 0.8, 0, 1);
+  const base = 0.17 * Math.exp(-Math.pow(radius / 0.33, 2)) * clamp((-y - 0.4) / 0.68, 0, 1);
+  return y - crown + base;
+}
+
 function inside(apple, x, y, z) {
   if (Math.abs(y) >= 1.08) return false;
-  const angle = Math.atan2(z, x);
-  const centerX = apple.tilt * y * 0.15;
-  return Math.hypot(x - centerX, z) <= appleShape(apple, y, angle);
+  // Invertimos la pequeña deformación vertical para muestrear exactamente el
+  // mismo cuerpo usado por la malla. Converge en unas pocas iteraciones.
+  let profileY = y;
+  let radius;
+  for (let i = 0; i < 5; i++) {
+    radius = Math.hypot(x - apple.tilt * profileY * 0.15, z);
+    profileY += y - surfaceY(profileY, radius);
+  }
+  if (profileY <= -1.08 || profileY >= 1.08) return false;
+  return radius <= appleShape(apple, profileY, Math.atan2(z, x - apple.tilt * profileY * 0.15));
 }
 
 function makeGeometry(apple) {
-  const sides = 64, rings = 42;
+  const sides = 80, rings = 56;
   const vertices = [], indices = [], tones = [];
   const base = new THREE.Color(apple.color);
+  const warm = new THREE.Color('#e2a74f');
+  const green = new THREE.Color('#729b55');
   for (let j = 0; j <= rings; j++) {
     const y = -1.08 + 2.16 * j / rings;
     for (let i = 0; i <= sides; i++) {
       const angle = 2 * Math.PI * i / sides;
       const radius = appleShape(apple, y, angle);
-      vertices.push(apple.tilt * y * 0.15 + radius * Math.cos(angle), y, radius * Math.sin(angle));
-      const streak = Math.sin(angle * 11 + apple.phase + y * 1.9) * 0.045;
-      const shade = 0.9 + 0.1 * (y + 1.08) / 2.16 + streak;
-      tones.push(base.r * shade, base.g * shade, base.b * shade);
+      vertices.push(apple.tilt * y * 0.15 + radius * Math.cos(angle), surfaceY(y, radius), radius * Math.sin(angle));
+      // Rubor, vetas y motas muy suaves; el patrón se cierra sin costura angular.
+      const streak = Math.sin(angle * 9 + apple.phase + y * 1.6) * 0.5 + 0.5;
+      const mottling = Math.sin(angle * 23 + y * 19) * Math.sin(angle * 17 - y * 27);
+      const tint = base.clone().lerp(warm, 0.07 + 0.1 * streak).lerp(green, 0.09 * (1 - streak) * (0.5 + 0.5 * y / 1.08));
+      const shade = 0.9 + 0.06 * y + 0.045 * mottling;
+      tones.push(tint.r * shade, tint.g * shade, tint.b * shade);
       if (j < rings && i < sides) {
         const a = j * (sides + 1) + i, b = a + sides + 1;
         indices.push(a, b, a + 1, b, b + 1, a + 1);
@@ -91,13 +111,13 @@ function makeApple(index) {
   apple.group.add(apple.body);
   // El tallo es decorativo: queda fuera del cálculo del peso.
   const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.027, 0.038, 0.34, 9), new THREE.MeshStandardMaterial({ color: '#553d26', roughness: 0.85 }));
-  stem.position.set(0.02, 1.18, 0);
+  stem.position.set(0.02, 0.96, 0);
   stem.rotation.z = 0.2;
   stem.castShadow = true;
   apple.group.add(stem);
   const leaf = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 8), new THREE.MeshStandardMaterial({ color: '#486c3d', roughness: 0.56, side: THREE.DoubleSide }));
   leaf.scale.set(0.23, 0.035, 0.105);
-  leaf.position.set(0.21, 1.28, 0);
+  leaf.position.set(0.21, 1.06, 0);
   leaf.rotation.set(0.2, -0.35, 0.35);
   apple.group.add(leaf);
   scene.add(apple.group);
@@ -533,6 +553,24 @@ $('#sound-toggle').addEventListener('click', () => {
   $('#sound-toggle').textContent = `SONIDO: ${soundEnabled ? 'ON' : 'OFF'}`;
   $('#sound-toggle').setAttribute('aria-label', `${soundEnabled ? 'Desactivar' : 'Activar'} sonido`);
   tone(750, 0.06);
+});
+
+const saveDialog = $('#save-dialog');
+$('#save-button').addEventListener('click', () => {
+  const agent = navigator.userAgent;
+  const ios = /iPad|iPhone|iPod/.test(agent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const android = /Android/.test(agent);
+  $('#save-instructions').textContent = ios
+    ? 'Si abriste el juego desde Instagram, ábrelo primero en Safari. En Safari, abre el menú de la página, elige «Añadir marcador» y guárdalo en «Favoritos». También puedes usar «Añadir a pantalla de inicio».'
+    : android
+      ? 'Si abriste el juego desde Instagram, ábrelo primero en Chrome. En Chrome, abre el menú ⋮ y toca la estrella para añadir el juego a tus marcadores.'
+      : `Pulsa ${/Macintosh|Mac OS X/.test(agent) ? '⌘' : 'Ctrl'} + D para guardarlo en los favoritos de tu navegador.`;
+  saveDialog.showModal();
+});
+$('#close-save').addEventListener('click', () => saveDialog.close());
+$('#save-done').addEventListener('click', () => saveDialog.close());
+saveDialog.addEventListener('click', (event) => {
+  if (event.target === saveDialog) saveDialog.close();
 });
 
 if (makeScene()) newGame();
