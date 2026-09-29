@@ -35,10 +35,11 @@ function appleShape(apple, y, angle) {
   const envelope = Math.pow(Math.max(0, Math.sin(Math.PI * h)), apple.roundness);
   const shoulder = 0.93 + 0.15 * h
     + apple.shoulder * 0.055 * Math.exp(-Math.pow((h - 0.7) / 0.16, 2));
-  // Los cinco lóbulos se concentran en la corona; los costados quedan suaves.
-  const crownLobes = Math.pow(clamp((h - 0.65) / 0.35, 0, 1), 2);
+  // Los cinco lóbulos alcanzan también el hombro, que define el contorno visto
+  // desde arriba. Una ondulación amplia rompe la simetría sin deformar el cuerpo.
+  const crownLobes = 0.48 + 0.52 * Math.exp(-Math.pow((h - 0.77) / 0.24, 2));
   const lobes = 1 + apple.lobe * Math.cos(5 * angle + apple.phase) * crownLobes
-    + apple.bend * Math.cos(3 * angle - apple.phase * 0.7) * (0.1 + 0.1 * h);
+    + apple.bend * Math.cos(2 * angle - apple.phase * 0.7) * (0.45 + 0.25 * h);
   return apple.width * envelope * shoulder * lobes;
 }
 
@@ -101,8 +102,8 @@ function makeApple(index) {
   const apple = {
     seed, color: colors[index], name: names[index], width: 0.95 + random() * 0.08,
     roundness: 0.4 + random() * 0.04, shoulder: 0.8 + random() * 0.4,
-    lobe: 0.025 + random() * 0.02, bend: 0.008 + random() * 0.012,
-    tilt: random() * 0.4 - 0.2, phase: random() * Math.PI * 2,
+    lobe: 0.032 + random() * 0.016, bend: 0.015 + random() * 0.009,
+    tilt: random() * 0.7 - 0.35, phase: random() * Math.PI * 2,
     weight: Math.round(172 + random() * 72), index,
   };
   apple.geometry = makeGeometry(apple);
