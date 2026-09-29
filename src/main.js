@@ -31,11 +31,14 @@ function noise(seed) {
 
 function appleShape(apple, y, angle) {
   const h = clamp((y + 1.08) / 2.16, 0, 1);
-  const envelope = Math.pow(Math.max(0, Math.sin(Math.PI * h)), 0.53);
-  // Hombros anchos y base algo más estrecha: perfil de manzana, no de esfera.
-  const shoulder = 0.86 + 0.34 * h + 0.12 * Math.exp(-Math.pow((h - 0.73) / 0.18, 2));
-  const lobes = 1 + apple.lobe * Math.cos(5 * angle + apple.phase) * (0.25 + 0.75 * h)
-    + apple.bend * Math.cos(3 * angle - apple.phase * 0.7) * (1 - 0.25 * h);
+  // Cuerpo lleno y redondeado, hombros apenas más anchos que la base.
+  const envelope = Math.pow(Math.max(0, Math.sin(Math.PI * h)), apple.roundness);
+  const shoulder = 0.93 + 0.15 * h
+    + apple.shoulder * 0.055 * Math.exp(-Math.pow((h - 0.7) / 0.16, 2));
+  // Los cinco lóbulos se concentran en la corona; los costados quedan suaves.
+  const crownLobes = Math.pow(clamp((h - 0.65) / 0.35, 0, 1), 2);
+  const lobes = 1 + apple.lobe * Math.cos(5 * angle + apple.phase) * crownLobes
+    + apple.bend * Math.cos(3 * angle - apple.phase * 0.7) * (0.1 + 0.1 * h);
   return apple.width * envelope * shoulder * lobes;
 }
 
@@ -96,9 +99,10 @@ function makeApple(index) {
   const seed = Math.floor(Math.random() * 0xffffffff);
   const random = noise(seed);
   const apple = {
-    seed, color: colors[index], name: names[index], width: 0.91 + random() * 0.15,
-    lobe: 0.035 + random() * 0.07, bend: 0.035 + random() * 0.08,
-    tilt: random() * 1.6 - 0.8, phase: random() * Math.PI * 2,
+    seed, color: colors[index], name: names[index], width: 0.95 + random() * 0.08,
+    roundness: 0.4 + random() * 0.04, shoulder: 0.8 + random() * 0.4,
+    lobe: 0.025 + random() * 0.02, bend: 0.008 + random() * 0.012,
+    tilt: random() * 0.4 - 0.2, phase: random() * Math.PI * 2,
     weight: Math.round(172 + random() * 72), index,
   };
   apple.geometry = makeGeometry(apple);
