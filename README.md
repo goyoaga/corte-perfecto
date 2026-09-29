@@ -34,12 +34,16 @@ Elige una de tres manzanas generadas con formas irregulares. Verás su **peso to
 | :--- | :--- |
 | 🍏 Frutas | Tres manzanas diferentes en cada partida. |
 | 📐 Corte | Un plano vertical definido por la línea que dibujas. Puedes reajustarla antes de confirmar. |
-| ⚖️ Peso | El volumen irregular de la misma forma 3D se muestrea de manera determinista; densidad uniforme. |
+| ⚖️ Peso | El peso total depende del volumen de cada manzana y de una pequeña variación de densidad. Las mitades se calculan muestreando su forma 3D. |
 | 🏆 Récord | Mejor diferencia porcentual guardada solo en tu navegador, cuando está disponible. |
 | 🔊 Sonido | Desactivado inicialmente; puedes activarlo desde la cabecera. |
 
 > [!NOTE]
 > La medición representa el volumen digital de la manzana, no un modelo físico o científico de densidad variable. Tallo y hoja son decorativos.
+
+## 📊 Visitas y partidas
+
+El juego usa GoatCounter para registrar las visitas y el evento `corte-realizado` al pulsar **Hacer el corte**. Las estadísticas se consultan en el panel de GoatCounter del sitio `corteperfecto.goatcounter.com`; GitHub Insights mide el repositorio, no las visitas al juego de GitHub Pages. Si el navegador bloquea el script de analítica, el juego sigue funcionando.
 
 ## 🚀 Jugar
 
