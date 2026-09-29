@@ -11,6 +11,12 @@ const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const rnd = (min, max) => min + Math.random() * (max - min);
 const colors = ['#bb3231', '#5a983d', '#d8b43e'];
 const names = ['Carmín', 'Verde', 'Dorada'];
+// Cada variedad mantiene una silueta de manzana, con rasgos visibles desde arriba.
+const shapes = [
+  { shoulder: 1.05, lobe: 0.05, bend: 0.012, asymmetry: 0.014 },
+  { shoulder: 0.9, lobe: 0.033, bend: 0.04, asymmetry: 0.022 },
+  { shoulder: 1.12, lobe: 0.042, bend: 0.024, asymmetry: 0.035 },
+];
 
 let renderer, scene, camera, apples = [], selected = null, state = 'select';
 let cut = null, pointerStart = null, cutCount = 0, soundEnabled = false;
@@ -39,8 +45,24 @@ function appleShape(apple, y, angle) {
   // desde arriba. Una ondulación amplia rompe la simetría sin deformar el cuerpo.
   const crownLobes = 0.48 + 0.52 * Math.exp(-Math.pow((h - 0.77) / 0.24, 2));
   const lobes = 1 + apple.lobe * Math.cos(5 * angle + apple.phase) * crownLobes
-    + apple.bend * Math.cos(2 * angle - apple.phase * 0.7) * (0.45 + 0.25 * h);
+    + apple.bend * Math.cos(2 * angle - apple.phase * 0.7) * (0.45 + 0.25 * h)
+    + apple.asymmetry * Math.cos(angle + apple.phase * 0.35) * (0.45 + 0.35 * h);
   return apple.width * envelope * shoulder * lobes;
+}
+
+function appleVolume(apple) {
+  // Área de cada sección horizontal integrada con la misma función que dibuja la piel.
+  // Basta para vincular el peso a la forma sin repetir el muestreo 3D del corte.
+  const levels = 48, angles = 64;
+  let squaredRadii = 0;
+  for (let j = 0; j < levels; j++) {
+    const y = -1.08 + (j + 0.5) * 2.16 / levels;
+    for (let i = 0; i < angles; i++) {
+      const radius = appleShape(apple, y, (i + 0.5) * 2 * Math.PI / angles);
+      squaredRadii += radius * radius;
+    }
+  }
+  return squaredRadii * Math.PI * 2.16 / (levels * angles);
 }
 
 function surfaceY(y, radius) {
@@ -99,13 +121,18 @@ function makeGeometry(apple) {
 function makeApple(index) {
   const seed = Math.floor(Math.random() * 0xffffffff);
   const random = noise(seed);
+  const shape = shapes[index];
   const apple = {
-    seed, color: colors[index], name: names[index], width: 0.95 + random() * 0.08,
-    roundness: 0.4 + random() * 0.04, shoulder: 0.8 + random() * 0.4,
-    lobe: 0.032 + random() * 0.016, bend: 0.015 + random() * 0.009,
+    seed, color: colors[index], name: names[index], width: 0.96 + random() * 0.07,
+    roundness: 0.4 + random() * 0.04, shoulder: shape.shoulder + (random() - 0.5) * 0.12,
+    lobe: shape.lobe + (random() - 0.5) * 0.008,
+    bend: shape.bend + (random() - 0.5) * 0.004,
+    asymmetry: shape.asymmetry + (random() - 0.5) * 0.004,
     tilt: random() * 0.7 - 0.35, phase: random() * Math.PI * 2,
-    weight: Math.round(172 + random() * 72), index,
+    index,
   };
+  // La densidad varía ligeramente entre piezas, pero el volumen domina el peso.
+  apple.weight = Math.round(43 * appleVolume(apple) * (0.97 + random() * 0.06));
   apple.geometry = makeGeometry(apple);
   apple.group = new THREE.Group();
   const skin = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.3, metalness: 0, clearcoat: 0.9, clearcoatRoughness: 0.17, side: THREE.DoubleSide });
