@@ -9,8 +9,8 @@ const fmt = (number) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: 
 const fmtPrecise = (number) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(number);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const rnd = (min, max) => min + Math.random() * (max - min);
-const colors = ['#bb3231', '#d8a83a', '#b74b3c'];
-const names = ['Carmín', 'Dorada', 'Rosada'];
+const colors = ['#bb3231', '#5a983d', '#d8b43e'];
+const names = ['Carmín', 'Verde', 'Dorada'];
 
 let renderer, scene, camera, apples = [], selected = null, state = 'select';
 let cut = null, pointerStart = null, cutCount = 0, soundEnabled = false;
