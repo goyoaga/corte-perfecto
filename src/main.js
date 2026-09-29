@@ -11,11 +11,11 @@ const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const rnd = (min, max) => min + Math.random() * (max - min);
 const colors = ['#bb3231', '#5a983d', '#d8b43e'];
 const names = ['Carmín', 'Verde', 'Dorada'];
-// Cada variedad mantiene una silueta de manzana, con rasgos visibles desde arriba.
+// Tres siluetas reconocibles que cambian de color en cada partida.
 const shapes = [
-  { shoulder: 1.05, lobe: 0.05, bend: 0.012, asymmetry: 0.014 },
-  { shoulder: 0.9, lobe: 0.033, bend: 0.04, asymmetry: 0.022 },
-  { shoulder: 1.12, lobe: 0.042, bend: 0.024, asymmetry: 0.035 },
+  { width: 0.99, roundness: 0.43, shoulder: 1.1, belly: -0.018, lobe: 0.072, bend: 0.014, asymmetry: 0.014, leanAngle: 0 },
+  { width: 0.93, roundness: 0.46, shoulder: 0.7, belly: 0.014, lobe: 0.046, bend: 0.042, asymmetry: 0.076, leanAngle: 0 },
+  { width: 1.055, roundness: 0.39, shoulder: 1.3, belly: -0.014, lobe: 0.056, bend: 0.06, asymmetry: 0.048, leanAngle: Math.PI },
 ];
 
 let renderer, scene, camera, apples = [], selected = null, state = 'select';
@@ -40,13 +40,14 @@ function appleShape(apple, y, angle) {
   // Cuerpo lleno y redondeado, hombros apenas más anchos que la base.
   const envelope = Math.pow(Math.max(0, Math.sin(Math.PI * h)), apple.roundness);
   const shoulder = 0.93 + 0.15 * h
-    + apple.shoulder * 0.055 * Math.exp(-Math.pow((h - 0.7) / 0.16, 2));
+    + apple.shoulder * 0.095 * Math.exp(-Math.pow((h - 0.7) / 0.16, 2))
+    + apple.belly * Math.exp(-Math.pow((h - 0.35) / 0.2, 2));
   // Los cinco lóbulos alcanzan también el hombro, que define el contorno visto
   // desde arriba. Una ondulación amplia rompe la simetría sin deformar el cuerpo.
   const crownLobes = 0.48 + 0.52 * Math.exp(-Math.pow((h - 0.77) / 0.24, 2));
   const lobes = 1 + apple.lobe * Math.cos(5 * angle + apple.phase) * crownLobes
     + apple.bend * Math.cos(2 * angle - apple.phase * 0.7) * (0.45 + 0.25 * h)
-    + apple.asymmetry * Math.cos(angle + apple.phase * 0.35) * (0.45 + 0.35 * h);
+    + apple.asymmetry * Math.cos(angle - apple.leanAngle) * (0.45 + 0.35 * h);
   return apple.width * envelope * shoulder * lobes;
 }
 
@@ -118,16 +119,18 @@ function makeGeometry(apple) {
   return geometry;
 }
 
-function makeApple(index) {
+function makeApple(index, shape) {
   const seed = Math.floor(Math.random() * 0xffffffff);
   const random = noise(seed);
-  const shape = shapes[index];
   const apple = {
-    seed, color: colors[index], name: names[index], width: 0.96 + random() * 0.07,
-    roundness: 0.4 + random() * 0.04, shoulder: shape.shoulder + (random() - 0.5) * 0.12,
+    seed, color: colors[index], name: names[index], width: shape.width + (random() - 0.5) * 0.025,
+    roundness: shape.roundness + (random() - 0.5) * 0.014,
+    shoulder: shape.shoulder + (random() - 0.5) * 0.08,
+    belly: shape.belly + (random() - 0.5) * 0.008,
     lobe: shape.lobe + (random() - 0.5) * 0.008,
-    bend: shape.bend + (random() - 0.5) * 0.004,
-    asymmetry: shape.asymmetry + (random() - 0.5) * 0.004,
+    bend: shape.bend + (random() - 0.5) * 0.006,
+    asymmetry: shape.asymmetry + (random() - 0.5) * 0.006,
+    leanAngle: shape.leanAngle + (random() - 0.5) * 0.28,
     tilt: random() * 0.7 - 0.35, phase: random() * Math.PI * 2,
     index,
   };
@@ -263,7 +266,13 @@ function newGame() {
   $('#cut-line').style.opacity = '0';
   $('#cut-button').disabled = true;
   options.innerHTML = '';
-  apples = [0, 1, 2].map((i) => makeApple(i));
+  // Una forma de cada tipo, barajada para que el color no revele la dificultad.
+  const shuffledShapes = [...shapes];
+  for (let i = shuffledShapes.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledShapes[i], shuffledShapes[j]] = [shuffledShapes[j], shuffledShapes[i]];
+  }
+  apples = [0, 1, 2].map((i) => makeApple(i, shuffledShapes[i]));
   apples.forEach((apple, i) => {
     apple.group.position.set((i - 1) * 1.82, 0.87, 0);
     apple.group.scale.setScalar(0.68);
